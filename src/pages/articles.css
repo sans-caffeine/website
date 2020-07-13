@@ -1,0 +1,20 @@
+@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+
+.articles-container {
+	min-height: calc( 100vh ) ;
+	background-color: white ;
+	padding: 0px !important;
+}
+
+.articles-view-container {
+	padding: 2rem !important ;
+}
+
+.articles-list-container {
+	padding: 0px !important ;
+}
+
+.article-list-group {
+	width: 100% ;
+}
+

@@ -1,0 +1,5 @@
+.home-container {
+	min-height: calc( 100vh - 140px ) ;
+	background-color: white ;
+	padding: 50px !important;
+}
