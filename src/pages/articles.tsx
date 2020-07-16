@@ -47,7 +47,7 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 		const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
 		const accessToken = cookie.load(cookie_accessToken);
 
-		if ( !accessToken ) { return 'dev'}
+//		if ( !accessToken ) { return 'dev'}
 
 		return accessToken;
 	}
