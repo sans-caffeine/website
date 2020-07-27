@@ -2,7 +2,8 @@ import React, { Component, ChangeEvent, MouseEvent } from 'react'
 import { Container, Row, Col, ListGroup, Image, ButtonToolbar, Button, Form, FormControl, Jumbotron } from 'react-bootstrap'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 import cookie from 'react-cookies'
-import { Editor } from '@tinymce/tinymce-react';
+import { Editor } from '@tinymce/tinymce-react'
+import Dynamic from '../components/dynamic'
 
 import './articles.css'
 
@@ -19,6 +20,8 @@ interface State {
 	loaded: boolean
 	edit: boolean
 	dirty: boolean
+	accessToken: string|null
+	jwt: any|null
 }
 
 class Articles extends Component<RouteComponentProps<Params>, State> {
@@ -30,7 +33,9 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 			articles: [],
 			loaded: false,
 			edit: false,
-			dirty: false
+			dirty: false,
+			accessToken: null,
+			jwt: null
 		}
 	}
 
@@ -47,7 +52,19 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 		const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
 		const accessToken = cookie.load(cookie_accessToken);
 
-//		if ( !accessToken ) { return 'dev'}
+		if ( accessToken ) {
+			if ( this.state.accessToken !== accessToken ) {
+				const tokenBody = accessToken.split('.')[1]
+				const decodableTokenBody = tokenBody.replace(/-/g, '+').replace(/_/g, '/')
+				const jwt = JSON.parse(Buffer.from(decodableTokenBody, 'base64').toString())
+
+				this.setState( { accessToken: accessToken, jwt: jwt } ) ;
+			}
+		} else {
+			if ( this.state.accessToken ) {
+				this.setState( { accessToken: null, jwt: null } ) ;
+			}
+		}
 
 		return accessToken;
 	}
@@ -125,26 +142,34 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 			const { articles } = this.state
 			const article = articles[parseInt(event.currentTarget.id)]
 			this.setState({ article: article, edit: false })
-			this.props.history.push("/articles/" + article.id)
+			this.props.history.push("/articles/" + article.name)
 		}
 	}
 
-	onSaveArticle = () => {
+	onSaveArticle = async () => {
 		const { article } = this.state;
 
 		if (!article) return
 
+		let response = null 
 		if (article.id) {
-			this.updateArticle(article)
+			response = await this.updateArticle(article)
 		} else {
-			this.createArticle(article)
+			response = await this.createArticle(article)
 		}
+
+		if ( Date.now() > this.state.jwt.exp * 1000 ) {
+			alert( "Access Token has expired" )
+			return 
+		}
+
+		console.log( response ) 
 
 		this.setState({ edit: false })
 	}
 
 	onCancel = () => {
-		alert('Cancel')
+		this.setState({ edit: false })
 	}
 
 	onFieldChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -232,7 +257,7 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 
 		if (!loaded) return <Container></Container>
 		if (!article) {
-			article = articles.find(({ id }) => id === article_id)
+			article = articles.find(({ name }) => name === article_id)
 			if (!article) {
 				return <h1>Article Not Found</h1>
 			}
@@ -241,45 +266,43 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 		return (
 			<Container className="articles-container">
 				{token
-					? <Jumbotron>
+					? <Jumbotron className="articles-view-jumbotron">
 						<h1>{article.title}</h1>
 						<ButtonToolbar className="float-right ml-auto justify-content-end">
 							<Button className="mr-2" variant="primary" size='sm' onClick={this.onEditArticle}>Edit</Button>
 						</ButtonToolbar>
 					</Jumbotron>
-					: <Jumbotron>
+					: <Jumbotron className="articles-view-jumbotron">
 						<h1>{article.title}</h1>
 					</Jumbotron>
 				}
 				<Container className="articles-view-container">
-					<Editor
-						value={article.content}
-						apiKey='xdlxqnf8mqguhjq4tbtqekuoyct1abgtzzy6x0ow3e0jlizo'
-						id='sans-editor'
-						init={{
-							branding: false,
-							toolbar: false,
-							menubar: false,
-							wordcount: false,
-							inline: true,
-						}}
-						onEditorChange={this.onEditorChange}
-						disabled={true}
-					/>
+					<Dynamic content={article.content}/>
 				</Container>
 			</Container>
 		)
 	}
 
 	renderArticleEdit = () => {
-		let { articles, article, dirty } = this.state
+		let { articles, article, dirty, jwt } = this.state
 		const { article_id } = this.props.match.params
 
 		if (!article) {
-			article = articles.find(({ id }) => id === article_id)
+			article = articles.find(({ name }) => name === article_id)
 			if (!article) {
 				article = { id: "", name: "", owner: "", title: "", description: "", content: "" }
 			}
+		}
+
+		let expiry = null 
+		try {
+			if ( jwt ) {
+				console.log( jwt ) 
+				expiry = new Date( jwt.exp * 1000 ).toString()
+				console.log( expiry )
+			} 
+		} catch (error ) {
+			console.log( error ) 
 		}
 
 		return (
@@ -288,8 +311,10 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 				<Form>
 					<Jumbotron>
 						<FormControl id="title" name="title" defaultValue={article.title} placeholder="Untitled" onChange={this.onFieldChange} />
+						<p>{expiry}</p>
 						<ButtonToolbar className="float-right ml-auto justify-content-end">
 							<Button className="mr-2" variant="primary" size='sm' onClick={this.onSaveArticle} disabled={!dirty}>Save</Button>
+							<Button className="mr-2" variant="primary" size='sm' onClick={this.onCancel}>Cancel</Button>
 						</ButtonToolbar>
 					</Jumbotron>
 					<Editor
@@ -323,7 +348,17 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 								'forecolor backcolor removeformat | ' +
 								'pagebreak | charmap emoticons | ' +
 								'code fullscreen preview print | ' +
-								'image media template link anchor codesample | a11ycheck ltr rtl '
+								'image media template link anchor codesample | a11ycheck ltr rtl ',
+							codesample_languages: [
+								{ text: 'Terraform', value: 'hcl'},
+								{ text: 'bash', value: 'bash' },
+								{ text: 'TypeScript', value: 'typescript' },
+								{ text: 'JSON', value: 'json' },
+								{ text: 'JavaScript', value: 'javascript' },
+								{ text: 'HTML/XML', value: 'markup' },
+								{ text: 'CSS', value: 'css' },
+								{ text: 'Java', value: 'java' },
+							],
 						}}
 						onEditorChange={this.onEditorChange}
 					//							disabled={true}

@@ -25,7 +25,7 @@ class App extends Component {
 				</Helmet>
 				<Navbar style={{paddingTop:0, paddingBottom:0}} collapseOnSelect bg="dark" variant="dark" fixed="top" expand="lg">
           <Navbar.Brand href="/">
-            Sans Demo
+            {config.application.title}
           </Navbar.Brand>
           <Navbar.Toggle />
 					<Navbar.Collapse id="basic-navbar-nav">
@@ -39,12 +39,13 @@ class App extends Component {
        	</Navbar>
 				<Navbar style={{paddingTop:0, paddingBottom:0}} fixed="bottom" variant="dark" bg="dark">
 					<Navbar.Brand>
-						&copy; Sans Caffeine 2019-2020
+						<small>&copy; Sans Caffeine 2019-2020</small>
 					</Navbar.Brand>
 				</Navbar> 
 				<Switch>
 					<Route path="/" exact component={Home} />
-					<Route path="/admin" exact component={Admin} />
+					<Route path="/admin" exact component={Articles} />
+					<Route path="/admin/:article_id" exact component={Articles} />
 					<Route path="/articles" exact component={Articles} />
 					<Route path="/articles/:article_id" component={Articles} />
 				</Switch>

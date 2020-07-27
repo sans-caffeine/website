@@ -10,6 +10,7 @@
     "@types/cookie": "^0.4.0",
     "@types/jest": "^24.9.1",
     "@types/node": "^12.12.47",
+    "@types/prismjs": "^1.16.1",
     "@types/react": "^16.9.36",
     "@types/react-bootstrap": "^1.0.1",
     "@types/react-cookies": "^0.1.0",
@@ -19,6 +20,7 @@
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
+    "prismjs": "^1.20.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
     "react-cookies": "^0.1.1",
@@ -49,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-plugin-prismjs": "^2.0.1"
   }
 }

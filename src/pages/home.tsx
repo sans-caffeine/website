@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Container } from "react-bootstrap"
 import cookie from 'react-cookies'
-import { Editor } from '@tinymce/tinymce-react';
+import Dynamic from '../components/dynamic' 
 
 import './home.css'
 
@@ -49,10 +49,6 @@ class Home extends Component<Props, State> {
 			articles: [],
 			loaded: false
 		}
-	}
-
-	componentDidMount = async () => {
-		this.getArticles()
 	}
 
 	getToken = () => {
@@ -107,29 +103,22 @@ class Home extends Component<Props, State> {
 
 	}
 
+
+	componentDidMount = () => {
+		this.getArticles()
+	}
+
 	render = () => {
 		const { articles, loaded } = this.state;
 		const article = loaded ? articles.find(({ name }) => name === "home") || homeArticle2 : homeArticle1
 
 		return (
 			<Container className="home-container">
-				<Editor
-					value={article.content}
-					apiKey='xdlxqnf8mqguhjq4tbtqekuoyct1abgtzzy6x0ow3e0jlizo'
-					id='sans-editor'
-					init={{
-						branding: false,
-						toolbar: false,
-						menubar: false,
-						wordcount: false,
-						inline: true,
-					}}
-					onEditorChange={this.handleEditorChange}
-					disabled={true}
-				/>
+				<Dynamic content={article.content}/>
 			</Container>
 		)
 	}
 }
+
 
 export default Home 
