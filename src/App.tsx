@@ -8,7 +8,7 @@ import {Helmet} from 'react-helmet'
 import './App.css'
 
 import Home from './pages/home' 
-import Admin from './pages/admin'
+//import Admin from './pages/admin'
 import Articles from './pages/articles'
 import config from './config'
 
@@ -46,8 +46,8 @@ class App extends Component {
 					<Route path="/" exact component={Home} />
 					<Route path="/admin" exact component={Articles} />
 					<Route path="/admin/:article_id" exact component={Articles} />
-					<Route path="/articles" exact component={Articles} />
-					<Route path="/articles/:article_id" component={Articles} />
+					<Route path="/articles" exact component={Home} />
+					<Route path="/articles/:article_id" exact component={Articles} />
 				</Switch>
 			</Router>
 			</Container>

@@ -22,10 +22,24 @@ interface Props {
 interface State {
 	articles: Array<Article>
 	loaded: boolean
+	api: boolean
 }
 
-const homeArticle1: Article = { id: "Home", name: "home", title: "Home", owner: "blank", content: "<h1>Static Website</h1><p>Congratulations on creating your static website</p><p>Now you can proceed to the next stage and add some dynamic content</p>" }
-const homeArticle2: Article = { id: "Home", name: "home", title: "Home", owner: "blank", content: "<h1>Dymamic Content</h1><p>Congratulations on adding dynamic content to your website</p><p>Create an article called Home and it will replace this placeholder</p>" }
+const homeStatic: Article = { 
+  id: "Home"
+, name: "home"
+, title: "Home"
+, owner: "blank"
+, content: "<h1>Static Website</h1><p>Congratulations on creating your static website</p><p>Now you can proceed to the next stage and add some dynamic content</p>" 
+}
+
+const homeDynamic: Article = { 
+	id: "Home"
+, name: "home"
+, title: "Home"
+, owner: "blank"
+, content: "<h1>Dymamic Content</h1><p>Congratulations on adding dynamic content to your website</p><p>Create an article called Home and it will replace this placeholder</p>" 
+}
 
 const defaultHomePage = {
 	"id": "6070942c-bdd7-44bc-8c68-fe6c1d6236f1",
@@ -47,7 +61,8 @@ class Home extends Component<Props, State> {
 
 		this.state = {
 			articles: [],
-			loaded: false
+			loaded: false,
+			api: false
 		}
 	}
 
@@ -73,12 +88,12 @@ class Home extends Component<Props, State> {
 				this.loadHomePage() ;
 			}
 
-			this.setState({ articles: articles, loaded: true })
+			this.setState({ articles: articles, loaded: true, api: true })
 
 			return articles;
 		} catch (error) {
-
 			console.log("Error getting article: ", error)
+			this.setState({ articles: [], loaded: true, api: false })
 		}
 	}
 
@@ -90,11 +105,8 @@ class Home extends Component<Props, State> {
 			await fetch(config.api.URL + '/articles', params)
 			let articles = [defaultHomePage] ;
 
-			this.setState({ articles: articles, loaded: true })
-
 			return articles;
 		} catch (error) {
-
 			console.log("Error getting article: ", error)
 		}
 	}
@@ -109,12 +121,15 @@ class Home extends Component<Props, State> {
 	}
 
 	render = () => {
-		const { articles, loaded } = this.state;
-		const article = loaded ? articles.find(({ name }) => name === "home") || homeArticle2 : homeArticle1
+		const { articles, loaded, api } = this.state;
+		const article = api ? articles.find(({ name }) => name === "overview") || homeDynamic : homeStatic
 
 		return (
 			<Container className="home-container">
-				<Dynamic content={article.content}/>
+				{ loaded 
+				? <Dynamic content={article.content}/>
+				: null
+				}
 			</Container>
 		)
 	}
