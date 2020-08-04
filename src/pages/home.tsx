@@ -69,10 +69,13 @@ class Home extends Component<Props, State> {
 	getToken = () => {
 		const client_id = config.authentication.AUTH_CLIENT;
 
-		const cookie_user = 'CognitoIdentityServiceProvider.' + client_id + '.LastAuthUser';
-		const username = cookie.load(cookie_user);
-		const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
-		const accessToken = cookie.load(cookie_accessToken);
+		let accessToken = "testing"
+		if ( client_id ) {
+			const cookie_user = 'CognitoIdentityServiceProvider.' + client_id + '.LastAuthUser';
+			const username = cookie.load(cookie_user);
+			const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
+			accessToken = cookie.load(cookie_accessToken);
+		}
 
 		return accessToken;
 	}

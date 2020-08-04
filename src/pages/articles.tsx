@@ -47,22 +47,25 @@ class Articles extends Component<RouteComponentProps<Params>, State> {
 	getToken = () => {
 		const client_id = config.authentication.AUTH_CLIENT;
 
-		const cookie_user = 'CognitoIdentityServiceProvider.' + client_id + '.LastAuthUser';
-		const username = cookie.load(cookie_user);
-		const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
-		const accessToken = cookie.load(cookie_accessToken);
+		let accessToken = "testing" ;
+		if ( client_id ) {
+			const cookie_user = 'CognitoIdentityServiceProvider.' + client_id + '.LastAuthUser';
+			const username = cookie.load(cookie_user);
+			const cookie_accessToken = 'CognitoIdentityServiceProvider.' + client_id + '.' + username + '.accessToken';
+			const accessToken = cookie.load(cookie_accessToken);
 
-		if ( accessToken ) {
-			if ( this.state.accessToken !== accessToken ) {
-				const tokenBody = accessToken.split('.')[1]
-				const decodableTokenBody = tokenBody.replace(/-/g, '+').replace(/_/g, '/')
-				const jwt = JSON.parse(Buffer.from(decodableTokenBody, 'base64').toString())
+			if ( accessToken ) {
+				if ( this.state.accessToken !== accessToken ) {
+					const tokenBody = accessToken.split('.')[1]
+					const decodableTokenBody = tokenBody.replace(/-/g, '+').replace(/_/g, '/')
+					const jwt = JSON.parse(Buffer.from(decodableTokenBody, 'base64').toString())
 
-				this.setState( { accessToken: accessToken, jwt: jwt } ) ;
-			}
-		} else {
-			if ( this.state.accessToken ) {
-				this.setState( { accessToken: null, jwt: null } ) ;
+					this.setState( { accessToken: accessToken, jwt: jwt } ) ;
+				}
+			} else {
+				if ( this.state.accessToken ) {
+					this.setState( { accessToken: null, jwt: null } ) ;
+				}
 			}
 		}
 
